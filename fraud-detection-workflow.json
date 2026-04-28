@@ -1,0 +1,253 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-bot",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "567c62bc-5159-4502-854a-b3ca5ac56d90",
+      "name": "Webhook",
+      "webhookId": "62efacc8-edb0-4a9f-874d-fdd26e7aca22"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0405f552-f4d8-4529-b341-e597059554d8",
+              "name": "Risk Score",
+              "value": "={{ JSON.parse($node[\"AI Agent\"].json.output).risk_score }}",
+              "type": "number"
+            },
+            {
+              "id": "8e90e518-a3f8-43c1-8d9c-a7158149c1f6",
+              "name": "Reason",
+              "value": "={{ JSON.parse($node[\"AI Agent\"].json.output).reason }}",
+              "type": "string"
+            },
+            {
+              "id": "6dc6fb1f-5671-4c4f-9a9d-78cf4373b296",
+              "name": "Verdict",
+              "value": "={{ JSON.parse($node[\"AI Agent\"].json.output).verdict }}",
+              "type": "string"
+            },
+            {
+              "id": "074d57fc-33de-47ee-b1d9-eaa5d7c6a29d",
+              "name": "Original_Message",
+              "value": "={{ $('Webhook').item.json.body.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        0
+      ],
+      "id": "a20bac01-7922-40c2-ac61-e53076ed6d28",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1tgrfNO_n31FX6DkSMc1l5gUDU9v6RqnuOm7OsW_6c6M",
+          "mode": "list",
+          "cachedResultName": "Bot Yaddaşı",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tgrfNO_n31FX6DkSMc1l5gUDU9v6RqnuOm7OsW_6c6M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "1 vərəq",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tgrfNO_n31FX6DkSMc1l5gUDU9v6RqnuOm7OsW_6c6M/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Risk Score": "={{ $json['Risk Score'] }}",
+            "Reason": "={{ $json.Reason }}",
+            "Verdict": "={{ $json.Verdict }}",
+            "Original Message": "={{ $json.Original_Message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Original Message",
+              "displayName": "Original Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Risk Score",
+              "displayName": "Risk Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Verdict",
+              "displayName": "Verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "b2d0e721-9908-4198-b9ad-b47d96b6e10a",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "InwLl8dPLpNNBPN3",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.webhookUrl }}",
+        "options": {
+          "systemMessage": "Sən kiber-təhlükəsizlik mütəxəssisisən. Sənə göndərilən mətni analiz et və YALNIZ aşağıdakı JSON formatında cavab ver. Başqa heç bir söz yazma.\n{\n\"risk_score\": (0-10 arası rəqəm),\n\"reason\": \"Niyə bu balı verdiyin barədə qısa izah\",\n\"verdict\": \"Təhlükəsiz, Şübhəli və ya Təhlükəli\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        0
+      ],
+      "id": "325cab60-614f-49a7-a86e-36ec3bef5f24",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "1ff9fe49-869b-4ef4-9218-111b9fdf7653",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Qj2OTIHiIHFVXtCK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "789b6c43-4789-4ee9-a680-b5cfdb9f836c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "973080a323ce9c690cf3b58704a12bff5fe7499d90f749b3bd4e4141a4ede61c"
+  },
+  "id": "7AxgPyIRHNxO1src",
+  "tags": []
+}
