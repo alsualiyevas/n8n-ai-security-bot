@@ -1,38 +1,29 @@
-# n8n AI Security Bot
+# AI-Powered Anti-Phishing Workflow
+An advanced cybersecurity automation tool designed to detect and analyze phishing attempts in the Azerbaijani language. This project integrates AI-driven context analysis with real-time URL verification.
 
-#Overview
-This is an automated cybersecurity system built with n8n that detects phishing attempts and fraudulent messages in real-time. It specifically supports the Azerbaijani language, making it a unique solution for local digital safety.
+🚀 Key Features
+Intelligent Filtering: Uses IF Logic to filter suspicious keywords (e.g., "Bank", "Card", "Urgent") before processing, optimizing resource usage.
 
-How It Works
-The workflow follows a sophisticated logic to ensure high accuracy:
+Custom JS Extraction: Employs JavaScript to precisely extract URLs from complex message structures.
 
-Webhook Trigger: Receives incoming messages (e.g., from Telegram or SMS).
+Live URL Verification: Performs real-time HTTP Request status checks to verify the accessibility and destination of suspicious links.
 
-IF Logic (Filtering): Filters messages based on keywords (Bank, Card, HTTP) to focus only on potential threats.
+AI Analysis: Powered by Google Gemini AI, providing a detailed security verdict and threat score in the Azerbaijani language.
 
-JavaScript Processing: Custom JS code extracts URLs from the message body for individual analysis.
+Automated Logging: Saves all analysis results to Google Sheets for monitoring and reporting.
 
-HTTP Request Verification: The system performs a live GET request to the extracted link to check its status and destination.
+🛠️ Tech Stack
+n8n: Workflow orchestration.
 
-Gemini AI Analysis: An AI Agent analyzes the message context and the link's metadata to provide a final security verdict in Azerbaijani.
+Google Gemini 1.5 Flash: Context-aware threat detection.
 
-Google Sheets Logging: Every analysis is logged into a database for future monitoring.
+JavaScript: Data manipulation and URL parsing.
 
-Tech Stack
-Automation: n8n
+HTTP API: External link status checks.
 
-AI: Google Gemini 1.5 Flash
+Google Sheets API: Database and logging.
 
-Programming: JavaScript
+📂 Project Structure
+fraud-detection-workflow.json: The complete n8n workflow file.
 
-Integration: HTTP API, Google Sheets API
-
-Language Support: Azerbaijani (Primary), English
-
-Recent Updates (May 4, 2026)
-Integrated HTTP Request node for real-time URL status verification.
-
-Added IF Logic to reduce AI token usage by filtering non-suspicious messages.
-
-Improved AI system prompts to recognize internal test environments (n8n webhooks).
-- AI / LLM
+README.md: Project documentation.
