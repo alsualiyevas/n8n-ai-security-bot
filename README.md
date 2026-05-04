@@ -1,31 +1,38 @@
 # n8n AI Security Bot
 
-## Overview
-AI-powered fraud and phishing detection system built with n8n.
+#Overview
+This is an automated cybersecurity system built with n8n that detects phishing attempts and fraudulent messages in real-time. It specifically supports the Azerbaijani language, making it a unique solution for local digital safety.
 
-It analyzes messages and URLs to detect suspicious behavior in real-time.
+How It Works
+The workflow follows a sophisticated logic to ensure high accuracy:
 
----
+Webhook Trigger: Receives incoming messages (e.g., from Telegram or SMS).
 
-## How it works
-- Input: user message (text / URL)
-- Processing: n8n workflow + AI analysis
-- Output: risk score + label (safe / suspicious / phishing)
+IF Logic (Filtering): Filters messages based on keywords (Bank, Card, HTTP) to focus only on potential threats.
 
----
+JavaScript Processing: Custom JS code extracts URLs from the message body for individual analysis.
 
-## Example
+HTTP Request Verification: The system performs a live GET request to the extracted link to check its status and destination.
 
-**Input:**
-"Təcili! Bank hesabınız bloklanıb: https://saxta-link.com"
+Gemini AI Analysis: An AI Agent analyzes the message context and the link's metadata to provide a final security verdict in Azerbaijani.
 
-**Output:**
-- Label: Phishing
-- Risk score: High
-- Reason: Suspicious URL + urgency pattern
+Google Sheets Logging: Every analysis is logged into a database for future monitoring.
 
----
+Tech Stack
+Automation: n8n
 
-## Tech Stack
-- n8n
+AI: Google Gemini 1.5 Flash
+
+Programming: JavaScript
+
+Integration: HTTP API, Google Sheets API
+
+Language Support: Azerbaijani (Primary), English
+
+Recent Updates (May 4, 2026)
+Integrated HTTP Request node for real-time URL status verification.
+
+Added IF Logic to reduce AI token usage by filtering non-suspicious messages.
+
+Improved AI system prompts to recognize internal test environments (n8n webhooks).
 - AI / LLM
