@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        0,
-        0
+        -64,
+        16
       ],
       "id": "567c62bc-5159-4502-854a-b3ca5ac56d90",
       "name": "Webhook",
@@ -43,7 +43,7 @@
             {
               "id": "074d57fc-33de-47ee-b1d9-eaa5d7c6a29d",
               "name": "Original_Message",
-              "value": "={{ $('Webhook').item.json.body.message }}",
+              "value": "={{ $node[\"Code in JavaScript\"].json.message_content }}",
               "type": "string"
             }
           ]
@@ -53,7 +53,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        720,
+        960,
         0
       ],
       "id": "a20bac01-7922-40c2-ac61-e53076ed6d28",
@@ -82,7 +82,7 @@
             "Risk Score": "={{ $json['Risk Score'] }}",
             "Reason": "={{ $json.Reason }}",
             "Verdict": "={{ $json.Verdict }}",
-            "Original Message": "={{ $json.Original_Message }}"
+            "Original Message": "={{ $node[\"Code in JavaScript\"].json[\"message_content\"] }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -135,7 +135,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1024,
+        1168,
         0
       ],
       "id": "b2d0e721-9908-4198-b9ad-b47d96b6e10a",
@@ -150,15 +150,15 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.webhookUrl }}",
+        "text": "={{ $('Webhook').item.json.webhookUrl }}",
         "options": {
-          "systemMessage": "Sən kiber-təhlükəsizlik mütəxəssisisən. Sənə göndərilən mətni analiz et və YALNIZ aşağıdakı JSON formatında cavab ver. Başqa heç bir söz yazma.\n{\n\"risk_score\": (0-10 arası rəqəm),\n\"reason\": \"Niyə bu balı verdiyin barədə qısa izah\",\n\"verdict\": \"Təhlükəsiz, Şübhəli və ya Təhlükəli\"\n}"
+          "systemMessage": "Sən kiber-təhlükəsizlik mütəxəssisisən. Sənə göndərilən mətni analiz et və YALNIZ aşağıdakı JSON formatında cavab ver. Başqa heç bir söz yazma. Əgər link n8n cloud-a aiddirsə, bu bizim test mühitimizdir, onu təhlükəli sayma.\n{\n\"risk_score\": (0-10 arası rəqəm),\n\"reason\": \"Niyə bu balı verdiyin barədə qısa izah\",\n\"verdict\": \"Təhlükəsiz, Şübhəli və ya Təhlükəli\"\n}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        304,
+        656,
         0
       ],
       "id": "325cab60-614f-49a7-a86e-36ec3bef5f24",
@@ -186,6 +186,78 @@
           "name": "Google Gemini(PaLM) Api account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dae570cb-3fd3-48be-81c4-3d074dcd83a6",
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "bank",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "c798408f-9113-4c0d-be2b-2dcbf7944594",
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "http",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        112,
+        16
+      ],
+      "id": "34eb13b9-3dd4-46a4-8fa5-a57c79d15735",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n// Webhook-dan gələn mesajı ehtiyatlı şəkildə götürürük\nconst message = $node[\"Webhook\"].json.body.message || \"\"; \n\n// Regex ilə linkləri axtarırıq\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = message.match(urlRegex);\n\nreturn {\n  has_url: !!urls,\n  extracted_url: urls ? urls[0] : null,\n  message_content: message\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "aec112ee-cef3-4974-ba36-5ce5bca37367",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.extracted_url }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "d2fb18ef-92fb-4dc6-85a5-039028bbedae",
+      "name": "HTTP Request",
+      "onError": "continueRegularOutput"
     }
   ],
   "pinData": {},
@@ -194,7 +266,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -233,6 +305,46 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -243,7 +355,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "789b6c43-4789-4ee9-a680-b5cfdb9f836c",
+  "versionId": "f1b83743-47ac-49ef-91a8-c168efc49dcc",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "973080a323ce9c690cf3b58704a12bff5fe7499d90f749b3bd4e4141a4ede61c"
